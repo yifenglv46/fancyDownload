@@ -8,8 +8,9 @@ sudo pip install -r requirements.txt
 ```bash
 python fancyDownload.py $fileUrl $filePath
 
+# eg: python fancyDownload.py https://xxx.com/1.zip ~/download/1.zip
 # $fileurl: 文件链接
-# $filePath: 存储路径
+# $filePath: 完整存储路径
 ```
 
 # 说明
