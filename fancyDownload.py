@@ -67,9 +67,20 @@ def getFileWork(objectFileUrl, objectFilePath):
             else:
                 t.join()
     else:
-        # todo: chunked编码方案预留
-        pass
-
+        # beta 1.0 for chunked
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (compatible; fancyDownload/1.0; +https://github.com/cppla/fancyDownload)'
+        }
+        r = requests.get(
+            url=objectFileUrl,
+            headers=headers,
+            stream=True
+        )
+        with open(objectFilePath, "wb+") as f:
+            for chunk in r.iter_content(chunk_size=1024 * 1024 * 32):
+                _OBJECT_FILE_SIZE += (len(chunk))
+                if chunk:
+                    f.write(chunk)
 
 if __name__ == '__main__':
     '''
