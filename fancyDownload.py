@@ -7,14 +7,10 @@ import time
 import sys
 import threading
 
-
-# 默认线程数
-MAX_THREAD = 16
-# 默认切块大小: 25mb
-SPLIT_SIZE = 1024*1024*16
 # 省内存模式还是暴力下载模式, 默认暴力下载
 OPEN_FORCE = 1
-# 总文件大小，判断平均下载速度用
+MAX_THREAD = 10
+SPLIT_SIZE = 1024*1024*32
 _OBJECT_FILE_SIZE = 0
 
 def getFileThread(objectFileUrl, objectFilePath, singleChunk):
