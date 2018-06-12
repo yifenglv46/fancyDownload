@@ -5,6 +5,7 @@ __author__='https://cpp.la'
 import requests
 import time
 import sys
+import re
 import threading
 
 # 省内存模式还是暴力下载模式, 默认暴力下载
@@ -36,14 +37,14 @@ def getFileThread(objectFileUrl, objectFilePath, singleChunk):
 
 def getFileWork(objectFileUrl, objectFilePath):
     r = requests.head(objectFileUrl)
-    if r.status_code in [301]:
+    if r.status_code in [301, 302]:
         r = requests.head(r.headers['Location'])
 
     if r.status_code in [404, 501, 502, 503]:
-        print('服务器异常,返回码: %d' % r.status_code)
+        print(u'服务器异常,返回码: %d' % r.status_code)
         return
     elif r.status_code in [401]:
-        print('服务器需要鉴权,返回码: %d' % r.status_code)
+        print(u'服务器需要鉴权,返回码: %d' % r.status_code)
         return
 
     if 'Content-Length' in r.headers:
@@ -92,6 +93,42 @@ def getFileWork(objectFileUrl, objectFilePath):
                 if chunk:
                     f.write(chunk)
 
+def getYoutube(objectFileUrl, objectFilePath):
+    '''
+    Now get source from www.clipconverter.cc
+    :param objectFileUrl:
+    :param objectFilePath:
+    :return:
+    '''
+    r = requests.post(
+        url='https://www.clipconverter.cc/check.php',
+        data={
+            'mediaurl': '%s' % objectFileUrl
+        }
+    )
+    if r.status_code != 200:
+        print(u'资源解析失败,返回码: %d' % r.status_code)
+        return
+    else:
+        jsonValue = r.json()
+        print('%s' % '*'*50)
+        for i_index, i in enumerate(jsonValue["url"]):
+            desc_html = i["text"]
+            filetype = i["filetype"]
+            re_flag = re.compile(r'<[^>]*>', re.S)
+            desc_str = re_flag.sub('', desc_html)
+            print(" %d: %s, %s" % (i_index+1, desc_str.replace('YouTube Video ',''), filetype))
+        print('%s' % '*' * 50)
+        videoVersion = input(u'输入视频版本序号(3GP冷存储速度极慢,慎选):')
+
+        videoInfo = jsonValue["url"][videoVersion-1]
+
+        objectFileUrl = videoInfo["url"]
+        objectFilePath = objectFilePath.split('.')[0] + '_' + videoInfo["text"].split('(')[1].split(')')[0] + '.' + objectFilePath.split('.')[-1]
+        objectFilePath = objectFilePath.replace(objectFilePath.split('.')[-1], videoInfo["filetype"].lower())
+        print(u'校验后的存储路径: %s' % objectFilePath)
+        getFileWork(objectFileUrl, objectFilePath)
+
 if __name__ == '__main__':
     '''
     python fancyDownload.py $fileUrl $filePath
@@ -102,6 +139,9 @@ if __name__ == '__main__':
     filePath = sys.argv[2]
 
     startTime = time.time()
-    getFileWork(fileUrl, filePath)
+    if 'https://www.youtube.com' in fileUrl:
+        getYoutube(fileUrl, filePath)
+    else:
+        getFileWork(fileUrl, filePath)
     endTime = time.time()
-    print("总耗时: %ds, 平均速度: %0.2fMb/s" % (int(endTime-startTime), _OBJECT_FILE_SIZE/1024/1024/(endTime-startTime)))
+    print(u"总耗时: %ds, 平均速度: %0.2fMb/s" % (int(endTime-startTime), _OBJECT_FILE_SIZE/1024/1024/(endTime-startTime)))
