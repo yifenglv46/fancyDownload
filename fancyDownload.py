@@ -36,6 +36,16 @@ def getFileThread(objectFileUrl, objectFilePath, singleChunk):
 
 def getFileWork(objectFileUrl, objectFilePath):
     r = requests.head(objectFileUrl)
+    if r.status_code in [301]:
+        r = requests.head(r.headers['Location'])
+
+    if r.status_code in [404, 501, 502, 503]:
+        print('服务器异常,返回码: %d' % r.status_code)
+        return
+    elif r.status_code in [401]:
+        print('服务器需要鉴权,返回码: %d' % r.status_code)
+        return
+
     if 'Content-Length' in r.headers:
         objectFileSize = int(r.headers['Content-Length'])
         global _OBJECT_FILE_SIZE
@@ -77,7 +87,7 @@ def getFileWork(objectFileUrl, objectFilePath):
             stream=True
         )
         with open(objectFilePath, "wb+") as f:
-            for chunk in r.iter_content(chunk_size=1024 * 1024 * 32):
+            for chunk in r.iter_content(chunk_size=SPLIT_SIZE):
                 _OBJECT_FILE_SIZE += (len(chunk))
                 if chunk:
                     f.write(chunk)
