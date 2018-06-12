@@ -8,12 +8,13 @@ sudo pip install -r requirements.txt
 ```bash
 python fancyDownload.py $fileUrl $filePath
 
+# $fileurl: 文件链接    
+# $filePath: 完整存储路径    
 # eg: python fancyDownload.py https://xxx.com/1.zip ~/download/1.zip
-# $fileurl: 文件链接
-# $filePath: 完整存储路径
 ```
 
 # 说明
+20180613: version1.1 加入多线程下载youtube资源    
 20180518: version1.0 支持http,https协议多线程下载    
 demo: https://cpp.la/?.html
 
