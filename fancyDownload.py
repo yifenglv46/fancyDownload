@@ -131,7 +131,7 @@ def getYoutube(objectFileUrl, objectFilePath):
             desc_str = re_flag.sub('', desc_html)
             print(" %d: %s, %s" % (i_index+1, desc_str.replace('YouTube Video ',''), filetype))
         print('%s' % '*' * 50)
-        videoVersion = input('视频序号(3GP冷存储,慎选! 根据视频源热门程度, 一般下载速度: 1080p > 720p > 2k > 360p > 4k):')
+        videoVersion = input('视频序号(3GP冷存储,慎选! 视频源越热门下载速度越快: 1080p > 720p > 360p):')
 
         videoInfo = jsonValue["url"][videoVersion-1]
 
