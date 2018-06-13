@@ -26,6 +26,13 @@ def getFileThread(objectFileUrl, objectFilePath, singleChunk):
         headers=headers,
         stream=True
     )
+    if r.status_code != 200:
+        time.sleep(2)
+        r = requests.get(
+            url=objectFilePath,
+            headers=headers,
+            stream=True
+        )
     with open(objectFilePath, "rb+") as f:
         f.seek((singleChunk - 1) * SPLIT_SIZE)
         if OPEN_FORCE:
@@ -111,6 +118,10 @@ def getYoutube(objectFileUrl, objectFilePath):
         return
     else:
         jsonValue = r.json()
+        if 'url' not in jsonValue:
+            print(u'ip异常,需Youtube验证码验证!')
+            return
+
         print('%s' % '*'*50)
         for i_index, i in enumerate(jsonValue["url"]):
             desc_html = i["text"]
