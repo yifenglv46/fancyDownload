@@ -1,5 +1,5 @@
 # fancyDownload
-花式下载器，Linux下多线程下载工具，python多线程下载，  "IDM" on linux
+Linux多线程下载工具，python多线程下载（支持youtube），  "IDM" on linux
 
 # 依赖
 sudo pip install -r requirements.txt
