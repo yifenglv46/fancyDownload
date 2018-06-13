@@ -26,10 +26,11 @@ def getFileThread(objectFileUrl, objectFilePath, singleChunk):
         headers=headers,
         stream=True
     )
-    if r.status_code != 200:
+    # http code: 4xx, 5xx
+    if str(r.status_code)[0] in ['4', '5']:
         time.sleep(2)
         r = requests.get(
-            url=objectFilePath,
+            url=objectFileUrl,
             headers=headers,
             stream=True
         )
