@@ -16,6 +16,6 @@ python fancyDownload.py $fileUrl $filePath
 # 说明
 20180613: version1.1 加入多线程下载youtube资源    
 20180518: version1.0 支持http,https协议多线程下载    
-demo: https://cpp.la/?.html
+demo: https://cpp.la/162.html
 
 # 未完待续
