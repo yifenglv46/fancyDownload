@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding: utf-8
 
 __author__='https://cpp.la'
@@ -6,7 +7,10 @@ import requests
 import time
 import sys
 import re
+import os
 import threading
+import onedrivesdk
+import pickle
 
 # 省内存模式还是暴力下载模式, 默认暴力下载
 OPEN_FORCE = 1
@@ -141,6 +145,81 @@ def getYoutube(objectFileUrl, objectFilePath):
         print(u'校验后的存储路径: %s' % objectFilePath)
         getFileWork(objectFileUrl, objectFilePath)
 
+def getOnedrive(fileUrl, filePath):
+    '''
+    :param fileUrl:
+    :param filePath:
+    :return:
+    '''
+    # save key to file
+    if os.path.exists(".fancyDownloadKey") is False:
+        print(u'第一次使用请创建应用, 创建教程: https://cpp.la/xx.html')
+        redirect_uri = raw_input("请输入应用回调链接: ")
+        client_id = raw_input('请输入应用ID: ')
+        client_secret = raw_input("请输入应用密钥: ")
+        api_base_url = 'https://api.onedrive.com/v1.0/'
+        scopes = ['wl.signin', 'wl.offline_access', 'onedrive.readwrite']
+        xdict = {
+            'redirect_uri': redirect_uri,
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'api_base_url': api_base_url,
+            'scopes': scopes
+        }
+        with open('.fancyDownloadKey', 'wb') as f:
+            pickle.dump(xdict, f)
+    else:
+        with open('.fancyDownloadKey', 'rb') as f:
+            xdict = pickle.load(f)
+        redirect_uri = xdict["redirect_uri"]
+        client_id = xdict["client_id"]
+        client_secret = xdict["client_secret"]
+        api_base_url = xdict["api_base_url"]
+        scopes = xdict["scopes"]
+
+    # save session to file
+    if os.path.exists(".fancyDownloadSession") is False:
+        http_provider = onedrivesdk.HttpProvider()
+        auth_provider = onedrivesdk.AuthProvider(
+            http_provider=http_provider,
+            client_id=client_id,
+            scopes=scopes)
+
+        client = onedrivesdk.OneDriveClient(api_base_url, auth_provider, http_provider)
+        auth_url = client.auth_provider.get_auth_url(redirect_uri)
+
+        print('****************************************')
+        print(u'一. 复制URL到浏览器-->回车-->点击是')
+        print(u'二. 复制"操作一"浏览器跳转后链接"code="后边的字符串.')
+        print(auth_url)
+        code = raw_input('请输入code代码: ')
+        # client.auth_provider.authenticate(code, redirect_uri, client_secret)
+
+        auth_provider = onedrivesdk.AuthProvider(http_provider,
+                                                 client_id,
+                                                 scopes)
+        auth_provider.authenticate(code, redirect_uri, client_secret)
+        dotfancyDownload = auth_provider.save_session()
+        with open('.fancyDownloadSession', 'wb') as f:
+            pickle.dump(dotfancyDownload, f)
+    else:
+        with open('.fancyDownloadSession', 'rb') as f:
+            dotfancyDownload = pickle.load(f)
+        http_provider = onedrivesdk.HttpProvider()
+
+    # start download file
+    dotfancyDownload = onedrivesdk.AuthProvider(http_provider,
+                                             client_id,
+                                             scopes)
+    dotfancyDownload.load_session()
+    dotfancyDownload.refresh_token()
+    fcdClient = onedrivesdk.OneDriveClient(api_base_url, dotfancyDownload, http_provider)
+
+    root_folder = fcdClient.item(drive='me', id='root').children["ceshi.txt"].get()
+    id_of_file = root_folder.id
+    fcdClient.item(drive='me', id=id_of_file).download('ceshi.txt')
+
+
 if __name__ == '__main__':
     '''
     python fancyDownload.py $fileUrl $filePath
@@ -153,6 +232,8 @@ if __name__ == '__main__':
     startTime = time.time()
     if 'https://www.youtube.com' in fileUrl:
         getYoutube(fileUrl, filePath)
+    elif 'onedrive' in fileUrl:
+        getOnedrive(fileUrl, filePath)
     else:
         getFileWork(fileUrl, filePath)
     endTime = time.time()
