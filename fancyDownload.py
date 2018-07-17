@@ -12,8 +12,6 @@ import threading
 import onedrivesdk
 import pickle
 
-# 省内存模式还是暴力下载模式, 默认暴力下载
-OPEN_FORCE = 1
 MAX_THREAD = 10
 SPLIT_SIZE = 1024*1024*32
 _OBJECT_FILE_SIZE = 0
@@ -40,12 +38,7 @@ def getFileThread(objectFileUrl, objectFilePath, singleChunk):
         )
     with open(objectFilePath, "rb+") as f:
         f.seek((singleChunk - 1) * SPLIT_SIZE)
-        if OPEN_FORCE:
-            f.write(r.content)
-        else:
-            for chunk in r.iter_content(chunk_size=512):
-                if chunk:
-                    f.write(chunk)
+        f.write(r.content)
 
 def getFileWork(objectFileUrl, objectFilePath):
     r = requests.head(objectFileUrl)
