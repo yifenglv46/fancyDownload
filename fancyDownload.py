@@ -28,7 +28,7 @@ def getFileThread(objectFileUrl, objectFilePath, objectSession, singleChunk):
     fileEnd = fileStart + SPLIT_SIZE - 1
 
     headers = objectSession
-    headers["User-Agent"] = "Mozilla/5.0 (compatible; fancyDownload/1.0; +https://github.com/cppla/fancyDownload)"
+    headers["User-Agent"] = "Mozilla/5.0 (compatible; fancyDownload/1.1; +https://github.com/cppla/fancyDownload)"
     headers["Range"] = "bytes=%d-%d" % (fileStart, fileEnd)
 
     r = requests.get(
@@ -98,7 +98,7 @@ def getFileWork(objectFileUrl, objectFilePath, objectSession):
                 t.join()
     else:
         headers = objectSession
-        headers["User-Agent"] = "Mozilla/5.0 (compatible; fancyDownload/1.0; +https://github.com/cppla/fancyDownload)"
+        headers["User-Agent"] = "Mozilla/5.0 (compatible; fancyDownload/1.1; +https://github.com/cppla/fancyDownload)"
 
         r = requests.get(
             url=objectFileUrl,
@@ -242,7 +242,7 @@ def getOnedrive(fileUrl, filePath):
     dotfancyDownload.refresh_token()
     fcdClient = onedrivesdk.OneDriveClient(api_base_url, dotfancyDownload, http_provider)
 
-    root_folder = fcdClient.item(drive='me', id='root').children["%s" % fileUrl.split("onedrive/")].get()
+    root_folder = fcdClient.item(drive='me', id='root').children["%s" % fileUrl.split("onedrive/")[-1]].get()
     id_of_file = root_folder.id
     fcdClient.item(drive='me', id=id_of_file).download(filePath)
 
