@@ -161,6 +161,7 @@ def getOnedrive(fileUrl, filePath):
             super(HttpProviderByFCD, self).__init__()
 
         def download(self, headers, url, path):
+
             response = requests.get(
                 url,
                 stream=True,
@@ -218,7 +219,7 @@ def getOnedrive(fileUrl, filePath):
         print('****************************************')
         print(u'一. 复制URL到浏览器-->回车-->点击是')
         print(u'二. 复制"操作一"浏览器跳转后链接"code="后边的字符串.')
-        print(auth_url)
+        print(u"URL: %s" % auth_url)
         code = raw_input('请输入code代码: ')
         # client.auth_provider.authenticate(code, redirect_uri, client_secret)
 
@@ -242,9 +243,9 @@ def getOnedrive(fileUrl, filePath):
     dotfancyDownload.refresh_token()
     fcdClient = onedrivesdk.OneDriveClient(api_base_url, dotfancyDownload, http_provider)
 
-    root_folder = fcdClient.item(drive='me', id='root').children["ceshi.txt"].get()
+    root_folder = fcdClient.item(drive='me', id='root').children["taohua.mkv"].get()
     id_of_file = root_folder.id
-    fcdClient.item(drive='me', id=id_of_file).download('ceshi.txt')
+    fcdClient.item(drive='me', id=id_of_file).download('taohua.mkv')
 
 
 if __name__ == '__main__':
