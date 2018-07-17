@@ -151,6 +151,33 @@ def getOnedrive(fileUrl, filePath):
     :param filePath:
     :return:
     '''
+
+    # by cpp.la
+    from onedrivesdk import HttpProvider
+    from onedrivesdk.http_response import HttpResponse
+    class HttpProviderByFCD(HttpProvider):
+
+        def __init__(self):
+            super(HttpProviderByFCD, self).__init__()
+
+        def download(self, headers, url, path):
+            response = requests.get(
+                url,
+                stream=True,
+                headers=headers)
+
+            if response.status_code == 200:
+                with open(path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
+                            f.flush()
+                custom_response = HttpResponse(response.status_code, response.headers, None)
+            else:
+                custom_response = HttpResponse(response.status_code, response.headers, response.text)
+
+            return custom_response
+
     # save key to file
     if os.path.exists(".fancyDownloadKey") is False:
         print(u'第一次使用请创建应用, 创建教程: https://cpp.la/xx.html')
@@ -179,7 +206,7 @@ def getOnedrive(fileUrl, filePath):
 
     # save session to file
     if os.path.exists(".fancyDownloadSession") is False:
-        http_provider = onedrivesdk.HttpProvider()
+        http_provider = HttpProviderByFCD()
         auth_provider = onedrivesdk.AuthProvider(
             http_provider=http_provider,
             client_id=client_id,
@@ -205,7 +232,7 @@ def getOnedrive(fileUrl, filePath):
     else:
         with open('.fancyDownloadSession', 'rb') as f:
             dotfancyDownload = pickle.load(f)
-        http_provider = onedrivesdk.HttpProvider()
+        http_provider = HttpProviderByFCD()
 
     # start download file
     dotfancyDownload = onedrivesdk.AuthProvider(http_provider,
