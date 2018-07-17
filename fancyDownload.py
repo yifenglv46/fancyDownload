@@ -205,7 +205,7 @@ def getOnedrive(fileUrl, filePath):
         scopes = xdict["scopes"]
 
     # save session to file
-    if os.path.exists("session.pickle") is False:
+    if os.path.exists(".fancyDownloadSession") is False:
         http_provider = HttpProviderByFCD()
         auth_provider = onedrivesdk.AuthProvider(
             http_provider=http_provider,
@@ -226,7 +226,7 @@ def getOnedrive(fileUrl, filePath):
                                                  client_id,
                                                  scopes)
         auth_provider.authenticate(code, redirect_uri, client_secret)
-        dotfancyDownload = auth_provider.save_session()
+        dotfancyDownload = auth_provider.save_session(path=".fancyDownloadSession")
     else:
         http_provider = HttpProviderByFCD()
 
@@ -234,7 +234,7 @@ def getOnedrive(fileUrl, filePath):
     dotfancyDownload = onedrivesdk.AuthProvider(http_provider,
                                              client_id,
                                              scopes)
-    dotfancyDownload.load_session()
+    dotfancyDownload.load_session(path=".fancyDownloadSession")
     dotfancyDownload.refresh_token()
     fcdClient = onedrivesdk.OneDriveClient(api_base_url, dotfancyDownload, http_provider)
 
