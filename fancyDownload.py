@@ -14,7 +14,6 @@ import pickle
 
 MAX_THREAD = 10
 SPLIT_SIZE = 1024*1024*32
-_OBJECT_FILE_SIZE = 0
 
 def getFileThread(objectFileUrl, objectFilePath, objectSession, singleChunk):
     '''
@@ -70,8 +69,6 @@ def getFileWork(objectFileUrl, objectFilePath, objectSession):
 
     if 'Content-Length' in r.headers:
         objectFileSize = int(r.headers['Content-Length'])
-        global _OBJECT_FILE_SIZE
-        _OBJECT_FILE_SIZE = objectFileSize
 
         with open(objectFilePath, "wb") as f:
             f.truncate(objectFileSize)
@@ -110,7 +107,6 @@ def getFileWork(objectFileUrl, objectFilePath, objectSession):
         )
         with open(objectFilePath, "wb+") as f:
             for chunk in r.iter_content(chunk_size=SPLIT_SIZE):
-                _OBJECT_FILE_SIZE += (len(chunk))
                 if chunk:
                     f.write(chunk)
 
@@ -161,7 +157,6 @@ def getOnedrive(fileUrl, filePath):
     :return:
     '''
 
-    # by cpp.la
     from onedrivesdk import HttpProvider
     from onedrivesdk.http_response import HttpResponse
     class HttpProviderByFCD(HttpProvider):
@@ -171,17 +166,12 @@ def getOnedrive(fileUrl, filePath):
 
         def download(self, headers, url, path):
 
-            response = requests.get(
-                url,
-                stream=True,
-                headers=headers)
+            response = requests.head(url, headers=headers)
+            if response.status_code in [301, 302]:
+                response = requests.head(response.headers['Location'], headers=headers)
 
             if response.status_code == 200:
-                with open(path, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=1024):
-                        if chunk:
-                            f.write(chunk)
-                            f.flush()
+                getFileWork(response.url, path, headers)
                 custom_response = HttpResponse(response.status_code, response.headers, None)
             else:
                 custom_response = HttpResponse(response.status_code, response.headers, response.text)
@@ -252,9 +242,9 @@ def getOnedrive(fileUrl, filePath):
     dotfancyDownload.refresh_token()
     fcdClient = onedrivesdk.OneDriveClient(api_base_url, dotfancyDownload, http_provider)
 
-    root_folder = fcdClient.item(drive='me', id='root').children["taohua.mkv"].get()
+    root_folder = fcdClient.item(drive='me', id='root').children["%s" % fileUrl.split("onedrive/")].get()
     id_of_file = root_folder.id
-    fcdClient.item(drive='me', id=id_of_file).download('taohua.mkv')
+    fcdClient.item(drive='me', id=id_of_file).download(filePath)
 
 
 if __name__ == '__main__':
@@ -266,12 +256,9 @@ if __name__ == '__main__':
     fileUrl = sys.argv[1]
     filePath = sys.argv[2]
 
-    startTime = time.time()
     if 'https://www.youtube.com' in fileUrl:
         getYoutube(fileUrl, filePath)
     elif 'onedrive' in fileUrl:
         getOnedrive(fileUrl, filePath)
     else:
-        getFileWork(fileUrl, filePath)
-    endTime = time.time()
-    print(u"总耗时: %ds, 平均速度: %0.2fMb/s" % (int(endTime-startTime), _OBJECT_FILE_SIZE/1024/1024/(endTime-startTime)))
+        getFileWork(fileUrl, filePath, {})
