@@ -16,13 +16,22 @@ MAX_THREAD = 10
 SPLIT_SIZE = 1024*1024*32
 _OBJECT_FILE_SIZE = 0
 
-def getFileThread(objectFileUrl, objectFilePath, singleChunk):
+def getFileThread(objectFileUrl, objectFilePath, objectSession, singleChunk):
+    '''
+
+    :param objectFileUrl: 请求链接
+    :param objectFilePath: 目标存储路径
+    :param objectSession: 验证头
+    :param singleChunk: 切块
+    :return:
+    '''
     fileStart = (singleChunk-1)*SPLIT_SIZE
     fileEnd = fileStart + SPLIT_SIZE - 1
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (compatible; fancyDownload/1.0; +https://github.com/cppla/fancyDownload)',
-        'Range': 'bytes=%d-%d' % (fileStart, fileEnd)
-    }
+
+    headers = objectSession
+    headers["User-Agent"] = "Mozilla/5.0 (compatible; fancyDownload/1.0; +https://github.com/cppla/fancyDownload)"
+    headers["Range"] = "bytes=%d-%d" % (fileStart, fileEnd)
+
     r = requests.get(
         url=objectFileUrl,
         headers=headers,
@@ -40,7 +49,14 @@ def getFileThread(objectFileUrl, objectFilePath, singleChunk):
         f.seek((singleChunk - 1) * SPLIT_SIZE)
         f.write(r.content)
 
-def getFileWork(objectFileUrl, objectFilePath):
+def getFileWork(objectFileUrl, objectFilePath, objectSession):
+    '''
+
+    :param objectFileUrl: 请求链接
+    :param objectFilePath: 目标存储路径
+    :param objectSession: 验证头
+    :return:
+    '''
     r = requests.head(objectFileUrl)
     if r.status_code in [301, 302]:
         r = requests.head(r.headers['Location'])
@@ -68,6 +84,7 @@ def getFileWork(objectFileUrl, objectFilePath):
                     kwargs={
                         'objectFileUrl': objectFileUrl,
                         'objectFilePath': objectFilePath,
+                        'objectSession': objectSession,
                         'singleChunk': splitCount
                     }
                 )
@@ -83,10 +100,9 @@ def getFileWork(objectFileUrl, objectFilePath):
             else:
                 t.join()
     else:
-        # beta 1.0 for chunked
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (compatible; fancyDownload/1.0; +https://github.com/cppla/fancyDownload)'
-        }
+        headers = objectSession
+        headers["User-Agent"] = "Mozilla/5.0 (compatible; fancyDownload/1.0; +https://github.com/cppla/fancyDownload)"
+
         r = requests.get(
             url=objectFileUrl,
             headers=headers,
