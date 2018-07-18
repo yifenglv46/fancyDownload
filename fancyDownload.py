@@ -238,7 +238,12 @@ def getOnedrive(fileUrl, filePath):
     dotfancyDownload.refresh_token()
     fcdClient = onedrivesdk.OneDriveClient(api_base_url, dotfancyDownload, http_provider)
 
-    root_folder = fcdClient.item(drive='me', id='root').children["%s" % fileUrl.split("onedrive/")[-1]].get()
+    # get onedrive path
+    ODFileName = fileUrl.split("onedrive")[-1].split("/")[-1]
+    ODFilePathT = fileUrl.split("/%s" % ODFileName)[0].split('onedrive/')[-1]
+    ODFilePath = '/' if ODFilePathT == 'onedrive' else ODFilePathT
+
+    root_folder = fcdClient.item(drive='me', path=ODFilePath).children[ODFileName].get()
     id_of_file = root_folder.id
     fcdClient.item(drive='me', id=id_of_file).download(filePath)
 
