@@ -17,7 +17,7 @@ python fancyDownload.py $fileUrl $filePath
 ```
 
 # 说明
-20180718: version1.2 加入多线程下载onedrive    
+20180718: version1.2 加入多线程下载onedrive (格式: onedrive/$待下载的文件onedrive绝对路径)   
 20180613: version1.1 加入多线程下载youtube    
 20180518: version1.0 支持http,https协议多线程下载    
 demo: https://cpp.la/162.html
