@@ -180,7 +180,7 @@ def getOnedrive(fileUrl, filePath):
 
     # save key to file
     if os.path.exists(".fancyDownloadKey") is False:
-        print(u'第一次使用请创建应用, 创建教程: https://cpp.la/xx.html')
+        print(u'第一次使用请创建应用, 创建教程: https://cpp.la/162.html')
         redirect_uri = raw_input("请输入应用回调链接: ")
         client_id = raw_input('请输入应用ID: ')
         client_secret = raw_input("请输入应用密钥: ")
