@@ -180,7 +180,7 @@ def getOnedrive(fileUrl, filePath):
 
     # save key to file
     if os.path.exists(".fancyDownloadKey") is False:
-        print(u'第一次使用请创建应用, 创建教程: https://cpp.la/162.html')
+        print(u'第一次使用请创建应用, 创建教程: https://cpp.la/162.html#onedrive-2')
         redirect_uri = raw_input("请输入应用回调链接: ")
         client_id = raw_input('请输入应用ID: ')
         client_secret = raw_input("请输入应用密钥: ")
@@ -216,8 +216,8 @@ def getOnedrive(fileUrl, filePath):
         auth_url = client.auth_provider.get_auth_url(redirect_uri)
 
         print('****************************************')
-        print(u'一. 复制URL到浏览器-->回车-->点击是')
-        print(u'二. 复制"操作一"浏览器跳转后链接"code="后边的字符串.')
+        print(u'一. 复制URL到浏览器-->回车-->点击是.')
+        print(u'二. 复制"操作一"跳转后的链接"code="后边的字符串.')
         print(u"URL: %s" % auth_url)
         code = raw_input('请输入code代码: ')
         # client.auth_provider.authenticate(code, redirect_uri, client_secret)
@@ -237,15 +237,7 @@ def getOnedrive(fileUrl, filePath):
     dotfancyDownload.load_session(path=".fancyDownloadSession")
     dotfancyDownload.refresh_token()
     fcdClient = onedrivesdk.OneDriveClient(api_base_url, dotfancyDownload, http_provider)
-
-    # get onedrive path
-    ODFileName = fileUrl.split("onedrive")[-1].split("/")[-1]
-    ODFilePathT = fileUrl.split("/%s" % ODFileName)[0].split('onedrive/')[-1]
-    ODFilePath = '/' if ODFilePathT == 'onedrive' else ODFilePathT
-
-    root_folder = fcdClient.item(drive='me', path=ODFilePath).children[ODFileName].get()
-    id_of_file = root_folder.id
-    fcdClient.item(drive='me', id=id_of_file).download(filePath)
+    fcdClient.item(drive='me', path=fileUrl.split("onedrive/")[-1]).download(filePath)
 
 
 if __name__ == '__main__':
