@@ -1,5 +1,5 @@
 # fancyDownload
-Linux多线程下载工具，python多线程下载（支持youtube），  "IDM" on linux
+Linux多线程下载工具，python多线程下载（支持youtube, onedrive），  "IDM" on linux
 
 # 依赖
 sudo pip install -r requirements.txt
@@ -9,12 +9,16 @@ sudo pip install -r requirements.txt
 python fancyDownload.py $fileUrl $filePath
 
 # $fileurl: 文件链接    
-# $filePath: 完整存储路径    
-# eg: python fancyDownload.py https://xxx.com/1.zip ~/download/1.zip
+# $filePath: 完整存储路径
+    
+# eg1: python fancyDownload.py https://xxx.com/1.zip ~/1.zip
+# eg2: python fancyDownload.py https://www.youtube.com/watch?v=z5d1LYRC-PA /download/jiayuan.mp4
+# eg3: python fancyDownload.py onedrive/myvideo/taohua.mkv ~/taohua.mkv
 ```
 
 # 说明
-20180613: version1.1 加入多线程下载youtube资源    
+20180718: version1.2 加入多线程下载onedrive    
+20180613: version1.1 加入多线程下载youtube    
 20180518: version1.0 支持http,https协议多线程下载    
 demo: https://cpp.la/162.html
 
